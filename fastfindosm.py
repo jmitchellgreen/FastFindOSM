@@ -1,3 +1,9 @@
+# FastFindOSM.py
+#
+# Created By: J. Mitchell Green
+# Email: jamesmitchellgreen@yahoo.com
+
+
 import requests
 import osm2geojson
 import geojson
@@ -6,7 +12,7 @@ import argparse
 import inquirer
 
 
-class FastOSM:
+class FastFindOSM:
     """
     This class accesses the open street map 'Overpass' API from a 'Nominatim' geocoding API
     search or direct query and transforms the response into a geojson
@@ -51,6 +57,10 @@ class FastOSM:
         # get list display names from osm items
         results = [item["display_name"] for item in response_json]
 
+        if not results:
+            print("No results, try again with different keywords")
+            return
+
         # inquirer CLI
         questions = [
             inquirer.List(
@@ -70,8 +80,6 @@ class FastOSM:
 
         key = osm_item[0]
         val = osm_item[1]
-
-        print(key, val)
 
         # query for Overpass API
         query = f"""
@@ -105,6 +113,6 @@ if __name__ == "__main__":
 
     # flag options to call function
     if args.queryfile:
-        FastOSM(args.outname).query_file(args.queryfile)
+        FastFindOSM(args.outname).query_file(args.queryfile)
     if args.search:
-        FastOSM(args.outname).nominatim_search(args.search)
+        FastFindOSM(args.outname).nominatim_search(args.search)
