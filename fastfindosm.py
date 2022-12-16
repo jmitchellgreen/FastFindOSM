@@ -10,6 +10,7 @@ import geojson
 import json
 import argparse
 import inquirer
+import pprint
 
 
 class FastFindOSM:
@@ -21,7 +22,7 @@ class FastFindOSM:
     def __init__(self, outname):
         self.OVERPASS_URL = "http://overpass-api.de/api/interpreter/"
         self.NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search?"
-        self.outnane = outname
+        self.outname = outname
 
     def osm_query_to_geojson(self, query):
         # call overpass API
@@ -34,7 +35,7 @@ class FastFindOSM:
         my_geojson = osm2geojson.json2geojson(osm_json)
 
         # dump to file
-        with open(self.outnane, "w") as file:
+        with open(self.outname, "w") as file:
             geojson.dump(my_geojson, file)
 
     def query_file(self, query_file):
@@ -44,7 +45,7 @@ class FastFindOSM:
 
         self.osm_query_to_geojson(query)
 
-    def nominatim_search(self, search_param):
+    def nominatim_search(self, search_param, download=False):
         # request for Nominatim Search geocoder
         response = requests.get(
             url=self.NOMINATIM_SEARCH_URL,
@@ -73,46 +74,56 @@ class FastFindOSM:
         # user selection
         answer = inquirer.prompt(questions)
 
-        # grab osm_type and osm_id
+        # grab answer info
         for item in response_json:
             if item["display_name"] == answer["response"]:
-                osm_item = [item["osm_type"], item["osm_id"]]
+                osm_id =  item["osm_id"]
+                osm_type = item["osm_type"]
+                display_name = item["display_name"]
 
-        key = osm_item[0]
-        val = osm_item[1]
 
-        # query for Overpass API
-        query = f"""
-        [out:json][timeout:1000];
-        nwr({val});
-        (._;>;);
-        out;
-        """
-        self.osm_query_to_geojson(query)
+        if download:
+            # query for Overpass API
+            query = f"""
+            [out:json][timeout:1000];
+            nwr({osm_id});
+            (._;>;);
+            out;
+            """
 
+            self.osm_query_to_geojson(query)
+
+        if not download:
+            info = {
+                "Feature Name:": display_name,
+                "OSM ID": osm_id,
+                "OSM Type": osm_type
+            }
+            pprint.pprint(info)
+
+        return
 
 if __name__ == "__main__":
     # initialize parser
     parser = argparse.ArgumentParser(
-        description="Query OpenStreetMap and download as geosjon"
+        description="Query OpenStreetMap and download as geojson"
     )
 
     # add argparse arguments
     parser.add_argument("-q", "--queryfile", help="File containing OSM Overpass query")
-    parser.add_argument(
-        "-s", "--search", help="Use Nominatim (geocoding) search to query OSM"
-    )
-    parser.add_argument(
-        "OUTFILE",
-        metavar="OUTFILE",
-        help="Output name for geojson file (need to include .geojson extension)",
-    )
+    parser.add_argument("-s", "--search", help="Use Nominatim (geocoding) search to query OSM")
+    parser.add_argument("-i", "--info", help="Info on selected OSM feature")
+    parser.add_argument("-o", "--outfile", help="Output name for geojson file (need to include .geojson extension)")
+
 
     # get args
     args = parser.parse_args()
+    # print(args)
 
     # flag options to call function
     if args.queryfile:
-        FastFindOSM(args.outname).query_file(args.queryfile)
+        FastFindOSM(args.outfile).query_file(args.queryfile)
     if args.search:
-        FastFindOSM(args.outname).nominatim_search(args.search)
+        FastFindOSM(args.outfile).nominatim_search(args.search, download=True)
+    if args.info:
+        FastFindOSM(args.outfile).nominatim_search(args.info)
