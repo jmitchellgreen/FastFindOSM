@@ -5,11 +5,11 @@ _____
         
 Usage
 
-`fastfindosm.py [-h] [-q QUERYFILE] [-s SEARCH] O`
+`fastfindosm.py [-h] [-q QUERYFILE] [-s SEARCH] OUTFILE`
 
 ```
 positional arguments:
-  O                     Output name for geojson file (need to include .geojson extension)
+  OUTFILE               Output name for geojson file (need to include .geojson extension)
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -30,7 +30,7 @@ optional arguments:
   - For example, if you are looking for *Paris, Texas, USA*, not *Paris, France* simply navigate down with the arrow keys to select the appropiate choice.  
 `python fastfindosm -s "Paris" paris.geojson`  
 Gives the following options:  
-``` Paris, Île-de-France, France métropolitaine, France
+```Paris, Île-de-France, France métropolitaine, France
    Paris, Île-de-France, France métropolitaine, France
  > Paris, Lamar County, Texas, 75460, United States
    Paris, Bourbon County, Kentucky, 40361, United States

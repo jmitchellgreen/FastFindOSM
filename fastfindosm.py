@@ -103,8 +103,8 @@ if __name__ == "__main__":
         "-s", "--search", help="Use Nominatim (geocoding) search to query OSM"
     )
     parser.add_argument(
-        "outname",
-        metavar="O",
+        "OUTFILE",
+        metavar="OUTFILE",
         help="Output name for geojson file (need to include .geojson extension)",
     )
 
